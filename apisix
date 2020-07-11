@@ -1,0 +1,20 @@
+#!/usr/bin/env php
+<?php
+
+use Symfony\Component\Console\Application;
+use winwin\apisix\cli\commands\ApplyCommand;
+use winwin\apisix\cli\commands\ConfigureCommand;
+use winwin\apisix\cli\commands\RoutesCommand;
+
+foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
+
+$application = new Application("apisix", "@version@");
+$application->add(new ConfigureCommand());
+$application->add(new ApplyCommand());
+$application->add(new RoutesCommand());
+$application->run();
