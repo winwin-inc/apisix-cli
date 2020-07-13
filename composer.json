@@ -17,5 +17,5 @@
     "require-dev": {
         "winwin/composer-phpcs-plugin": "^0.1"
     },
-    "bin": ["./apisix"]
+    "bin": ["./apisix-cli"]
 }
