@@ -7,6 +7,10 @@ use winwin\apisix\cli\exception\ResourceNotFoundException;
 
 class ApplyCommand extends AbstractCommand
 {
+    private const ID_KEY = [
+        'consumers' => 'username',
+    ];
+
     protected function configure(): void
     {
         parent::configure();
@@ -24,7 +28,7 @@ class ApplyCommand extends AbstractCommand
                     $result = $this->patch($node['value'], $item);
                     $this->getAdminClient()->patchJson($category.'/'.$id, $result);
                 } catch (ResourceNotFoundException $e) {
-                    $item['id'] = $id;
+                    $item[self::ID_KEY[$category] ?? 'id'] = $id;
                     $this->getAdminClient()->putJson($category, $item);
                 }
             }

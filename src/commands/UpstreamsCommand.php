@@ -4,6 +4,7 @@ namespace winwin\apisix\cli\commands;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use winwin\apisix\cli\ArrayHelper;
 
 class UpstreamsCommand extends AbstractCommand
 {
@@ -23,7 +24,7 @@ class UpstreamsCommand extends AbstractCommand
             if ($this->input->getOption('delete')) {
                 $this->deleteUpstream($upstreamId);
             } else {
-                $this->showUpstreamInfo($upstreamId);
+                $this->showUpstream($upstreamId);
             }
 
             return;
@@ -42,7 +43,7 @@ class UpstreamsCommand extends AbstractCommand
         $table->render();
     }
 
-    private function showUpstreamInfo(string $upstreamId): void
+    private function showUpstream(string $upstreamId): void
     {
         $node = $this->getAdminClient()->get('upstreams/'.$upstreamId);
         if ('json' === $this->input->getOption('format')) {
@@ -53,37 +54,18 @@ class UpstreamsCommand extends AbstractCommand
             return;
         }
         $table = $this->createTable(['Name', 'Value']);
-        $table->addRow(['ID', $upstreamId]);
-        foreach ($this->flatten($node['value']) as $key => $value) {
-            if ('id' === $key) {
-                continue;
-            }
+        foreach (ArrayHelper::flatten($node['value']) as $key => $value) {
             $table->addRow([$key, $value]);
         }
         $table->render();
     }
 
-    private function flatten(array $upstream, string $prefix = null): array
-    {
-        $values = [];
-        foreach ($upstream as $key => $value) {
-            $name = ($prefix ? $prefix.'.' : '').$key;
-            if (is_array($value) && !isset($value[0])) {
-                $values = array_merge($values, $this->flatten($value, $name));
-            } else {
-                $values[$name] = is_array($value) ? json_encode($value, JSON_UNESCAPED_SLASHES) : $value;
-            }
-        }
-
-        return $values;
-    }
-
-    protected function getUpstreamId(array $node)
+    protected function getUpstreamId(array $node): string
     {
         return $node['value']['id'] ?? (substr($node['key'], strlen('/apisix/upstreams/')));
     }
 
-    private function deleteUpstream(string $upstreamId)
+    private function deleteUpstream(string $upstreamId): void
     {
         $this->getAdminClient()->delete('upstreams/'.$upstreamId);
         $this->output->writeln("<info>Delete upstream $upstreamId successfully!</info>");

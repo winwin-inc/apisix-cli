@@ -20,9 +20,6 @@ class Config
      */
     private $token;
 
-    /**
-     * Config constructor.
-     */
     public function __construct(string $endpoint = '', string $token = '')
     {
         $this->endpoint = $endpoint;
@@ -93,7 +90,7 @@ class Config
         return self::getHomeDir().'/'.self::CONFIG_JSON;
     }
 
-    private static function getHomeDir()
+    private static function getHomeDir(): string
     {
         $home = getenv('HOME');
         if (!empty($home)) {

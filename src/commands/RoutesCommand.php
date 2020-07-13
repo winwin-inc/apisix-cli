@@ -4,6 +4,7 @@ namespace winwin\apisix\cli\commands;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use winwin\apisix\cli\ArrayHelper;
 
 class RoutesCommand extends AbstractCommand
 {
@@ -23,7 +24,7 @@ class RoutesCommand extends AbstractCommand
             if ($this->input->getOption('delete')) {
                 $this->deleteRoute($routeId);
             } else {
-                $this->showRouteInfo($routeId);
+                $this->showRoute($routeId);
             }
 
             return;
@@ -42,7 +43,7 @@ class RoutesCommand extends AbstractCommand
         $table->render();
     }
 
-    private function getItem(array $route, string $key, string $pluralKey = null)
+    private function getItem(array $route, string $key, string $pluralKey = null): string
     {
         if (!isset($pluralKey)) {
             $pluralKey = $key.'s';
@@ -54,7 +55,7 @@ class RoutesCommand extends AbstractCommand
         );
     }
 
-    private function showRouteInfo(string $routeId): void
+    private function showRoute(string $routeId): void
     {
         $node = $this->getAdminClient()->get('routes/'.$routeId);
         if ('json' === $this->input->getOption('format')) {
@@ -65,37 +66,18 @@ class RoutesCommand extends AbstractCommand
             return;
         }
         $table = $this->createTable(['Name', 'Value']);
-        $table->addRow(['ID', $routeId]);
-        foreach ($this->flatten($node['value']) as $key => $value) {
-            if ('id' === $key) {
-                continue;
-            }
+        foreach (ArrayHelper::flatten($node['value']) as $key => $value) {
             $table->addRow([$key, $value]);
         }
         $table->render();
     }
 
-    private function flatten(array $route, string $prefix = null): array
-    {
-        $values = [];
-        foreach ($route as $key => $value) {
-            $name = ($prefix ? $prefix.'.' : '').$key;
-            if (is_array($value) && !isset($value[0])) {
-                $values = array_merge($values, $this->flatten($value, $name));
-            } else {
-                $values[$name] = is_array($value) ? json_encode($value, JSON_UNESCAPED_SLASHES) : $value;
-            }
-        }
-
-        return $values;
-    }
-
-    protected function getRouteId(array $node)
+    protected function getRouteId(array $node): string
     {
         return $node['value']['id'] ?? (substr($node['key'], strlen('/apisix/routes/')));
     }
 
-    private function deleteRoute(string $routeId)
+    private function deleteRoute(string $routeId): void
     {
         $this->getAdminClient()->delete('routes/'.$routeId);
         $this->output->writeln("<info>Delete route $routeId successfully!</info>");

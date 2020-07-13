@@ -56,8 +56,8 @@ class ApisixAdminClient implements LoggerAwareInterface
                 if (404 === $response->getStatusCode()) {
                     throw new ResourceNotFoundException($data['cause']);
                 }
-                if (!isset($data['node'])) {
-                    throw new BadResponseException('No node in response');
+                if (!empty($data) && !isset($data['node'])) {
+                    throw new BadResponseException("key 'node' not found in response: ".$response->getBody());
                 }
                 $this->result = $data['node'] ?? null;
 
