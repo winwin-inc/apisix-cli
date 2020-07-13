@@ -54,7 +54,7 @@ class ApisixAdminClient implements LoggerAwareInterface
             $handler->push(Middleware::mapResponse(function (ResponseInterface $response) {
                 $data = json_decode((string) $response->getBody(), true);
                 if (404 === $response->getStatusCode()) {
-                    throw new ResourceNotFoundException($data['cause']);
+                    throw new ResourceNotFoundException($data['cause'] ?? (string) $response->getBody());
                 }
                 if (!empty($data) && !isset($data['node'])) {
                     throw new BadResponseException("key 'node' not found in response: ".$response->getBody());

@@ -4,6 +4,7 @@
 use Symfony\Component\Console\Application;
 use winwin\apisix\cli\commands\ApplyCommand;
 use winwin\apisix\cli\commands\ConfigureCommand;
+use winwin\apisix\cli\commands\ConsumersCommand;
 use winwin\apisix\cli\commands\RoutesCommand;
 use winwin\apisix\cli\commands\UpstreamsCommand;
 
@@ -19,4 +20,5 @@ $application->add(new ConfigureCommand());
 $application->add(new ApplyCommand());
 $application->add(new RoutesCommand());
 $application->add(new UpstreamsCommand());
+$application->add(new ConsumersCommand());
 $application->run();

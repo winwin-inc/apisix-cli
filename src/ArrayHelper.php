@@ -20,6 +20,6 @@ class ArrayHelper
             }
         }
 
-        return array_merge(...$values);
+        return empty($values) ? [] : array_merge(...$values);
     }
 }
