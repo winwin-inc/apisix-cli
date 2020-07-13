@@ -30,7 +30,7 @@ class RoutesCommand extends AbstractCommand
         }
         $table = $this->createTable(['ID', 'Hosts', 'Methods', 'Uris']);
         $data = $this->getAdminClient()->get('routes');
-        foreach ($data['nodes'] as $node) {
+        foreach ($data['nodes'] ?? [] as $node) {
             $route = $node['value'];
             $table->addRow([
                 $this->getRouteId($node),
@@ -57,9 +57,19 @@ class RoutesCommand extends AbstractCommand
     private function showRouteInfo(string $routeId): void
     {
         $node = $this->getAdminClient()->get('routes/'.$routeId);
+        if ('json' === $this->input->getOption('format')) {
+            $this->output->write(json_encode([
+                'routes' => [$routeId => $node],
+            ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+
+            return;
+        }
         $table = $this->createTable(['Name', 'Value']);
-        $table->addRow(['ID', $this->getRouteId($node)]);
+        $table->addRow(['ID', $routeId]);
         foreach ($this->flatten($node['value']) as $key => $value) {
+            if ('id' === $key) {
+                continue;
+            }
             $table->addRow([$key, $value]);
         }
         $table->render();
