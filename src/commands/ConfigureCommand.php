@@ -16,6 +16,8 @@ class ConfigureCommand extends Command
     {
         $this->setName('configure')
             ->setDescription('Configures API parameters');
+        $this->addOption('endpoint', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('api-key', null, InputOption::VALUE_REQUIRED);
         $this->addOption('config', null, InputOption::VALUE_REQUIRED, 'config file path');
     }
 
@@ -24,8 +26,16 @@ class ConfigureCommand extends Command
         $config = Config::getInstance();
         /** @var QuestionHelper $helper */
         $helper = $this->getHelper('question');
-        $config->setEndpoint($helper->ask($input, $output, $this->createQuestion('APISIX ADMIN URL', 'http://127.0.0.1:9080')));
-        $config->setToken($helper->ask($input, $output, $this->createQuestion('API KEY')));
+        if ($input->getOption('endpoint')) {
+            $config->setEndpoint($input->getOption('endpoint'));
+        } else {
+            $config->setEndpoint($helper->ask($input, $output, $this->createQuestion('APISIX ADMIN URL', 'http://127.0.0.1:9080')));
+        }
+        if ($input->getOption('api-key')) {
+            $config->setToken($input->getOption('api-key'));
+        } else {
+            $config->setToken($helper->ask($input, $output, $this->createQuestion('API KEY')));
+        }
         Config::save($config, $input->getOption('config'));
 
         return 0;
