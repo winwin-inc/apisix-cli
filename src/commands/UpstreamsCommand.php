@@ -14,6 +14,7 @@ class UpstreamsCommand extends AbstractCommand
         $this->setName('upstreams');
         $this->addArgument('id', InputArgument::OPTIONAL, 'show upstream by id');
         $this->addOption('delete', null, InputOption::VALUE_NONE, 'Delete upstream');
+        $this->addOption('remove-node', null, InputOption::VALUE_REQUIRED, 'Remove node from upstream');
         $this->setDescription('list upstream');
     }
 
@@ -23,6 +24,8 @@ class UpstreamsCommand extends AbstractCommand
         if ($upstreamId) {
             if ($this->input->getOption('delete')) {
                 $this->deleteUpstream($upstreamId);
+            } elseif ($this->input->getOption('remove-node')) {
+                $this->removeNode($upstreamId, $this->input->getOption('remove-node'));
             } else {
                 $this->showUpstream($upstreamId);
             }
@@ -55,6 +58,9 @@ class UpstreamsCommand extends AbstractCommand
         }
         $table = $this->createTable(['Name', 'Value']);
         foreach (ArrayHelper::flatten($node['value']) as $key => $value) {
+            if (in_array($key, ['update_time', 'create_time'], true)) {
+                $value = date('Y-m-d H:i:s', $value);
+            }
             $table->addRow([$key, $value]);
         }
         $table->render();
@@ -69,5 +75,19 @@ class UpstreamsCommand extends AbstractCommand
     {
         $this->getAdminClient()->delete('upstreams/'.$upstreamId);
         $this->output->writeln("<info>Delete upstream $upstreamId successfully!</info>");
+    }
+
+    private function removeNode(string $upstreamId, string $node): void
+    {
+        $upstream = $this->getAdminClient()->get('upstreams/'.$upstreamId);
+        if (!isset($upstream['value']['nodes'][$node])) {
+            $this->output->writeln("<error>Upstream $upstreamId does not has node $node, node list "
+                .implode(',', array_keys($upstream['value']['nodes'])).'</error>');
+        }
+        $upstream['value']['nodes'][$node] = null;
+        $this->getAdminClient()->patchJson('upstreams/'.$upstreamId, [
+            'nodes' => $upstream['value']['nodes'],
+        ]);
+        $this->output->writeln("<info>Remove node $node from upstream $upstreamId successfully!</info>");
     }
 }

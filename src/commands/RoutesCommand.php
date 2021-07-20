@@ -29,12 +29,13 @@ class RoutesCommand extends AbstractCommand
 
             return;
         }
-        $table = $this->createTable(['ID', 'Hosts', 'Methods', 'Uris']);
+        $table = $this->createTable(['ID', 'Upstream', 'Hosts', 'Methods', 'Uris']);
         $data = $this->getAdminClient()->get('routes');
         foreach ($data['nodes'] ?? [] as $node) {
             $route = $node['value'];
             $table->addRow([
                 $this->getRouteId($node),
+                $route['upstream_id'] ?? '',
                 $this->getItem($route, 'host'),
                 $this->getItem($route, 'method'),
                 $this->getItem($route, 'uri'),
@@ -48,11 +49,11 @@ class RoutesCommand extends AbstractCommand
         if (!isset($pluralKey)) {
             $pluralKey = $key.'s';
         }
+        if (!empty($route[$pluralKey])) {
+            return json_encode($route[$pluralKey], JSON_UNESCAPED_SLASHES);
+        }
 
-        return json_encode(
-            $route[$pluralKey] ?? (isset($route[$key]) ? [$route[$key]] : []),
-            JSON_UNESCAPED_SLASHES
-        );
+        return $route[$key] ?? '';
     }
 
     private function showRoute(string $routeId): void
