@@ -59,6 +59,9 @@ class ConsumersCommand extends AbstractCommand
         }
         $table = $this->createTable(['Name', 'Value']);
         foreach (ArrayHelper::flatten($node['value']) as $key => $value) {
+            if (in_array($key, ['update_time', 'create_time'], true)) {
+                $value = date('Y-m-d H:i:s', $value);
+            }
             $table->addRow([$key, $value]);
         }
         $table->render();
