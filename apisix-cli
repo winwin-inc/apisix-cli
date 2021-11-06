@@ -3,6 +3,7 @@
 
 use Symfony\Component\Console\Application;
 use winwin\apisix\cli\commands\ApplyCommand;
+use winwin\apisix\cli\commands\CertsCommand;
 use winwin\apisix\cli\commands\ConfigureCommand;
 use winwin\apisix\cli\commands\ConsumersCommand;
 use winwin\apisix\cli\commands\RoutesCommand;
@@ -21,4 +22,5 @@ $application->add(new ApplyCommand());
 $application->add(new RoutesCommand());
 $application->add(new UpstreamsCommand());
 $application->add(new ConsumersCommand());
+$application->add(new CertsCommand());
 $application->run();

@@ -7,7 +7,7 @@
         }
     },
     "require": {
-        "php": "^7.2",
+        "php": ">=7.2",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^7.0",
         "monolog/monolog": "^2.0",
@@ -15,6 +15,7 @@
         "symfony/console": "^5.0"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-latest",
         "winwin/composer-phpcs-plugin": "^0.1"
     },
     "bin": ["./apisix-cli"]
