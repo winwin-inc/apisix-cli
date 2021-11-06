@@ -16,7 +16,7 @@
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
-        "winwin/composer-phpcs-plugin": "^0.1"
+        "winwin/composer-phpcs-plugin": "^0.2"
     },
     "bin": ["./apisix-cli"]
 }
