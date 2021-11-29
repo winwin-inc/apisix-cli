@@ -15,6 +15,7 @@ class UpstreamsCommand extends AbstractCommand
         $this->addArgument('id', InputArgument::OPTIONAL, 'show upstream by id');
         $this->addOption('delete', null, InputOption::VALUE_NONE, 'Delete upstream');
         $this->addOption('remove-node', null, InputOption::VALUE_REQUIRED, 'Remove node from upstream');
+        $this->addOption('add-node', null, InputOption::VALUE_REQUIRED, 'Remove node from upstream');
         $this->setDescription('list upstream');
     }
 
@@ -26,6 +27,8 @@ class UpstreamsCommand extends AbstractCommand
                 $this->deleteUpstream($upstreamId);
             } elseif ($this->input->getOption('remove-node')) {
                 $this->removeNode($upstreamId, $this->input->getOption('remove-node'));
+            } elseif ($this->input->getOption('add-node')) {
+                $this->addNode($upstreamId, $this->input->getOption('add-node'));
             } else {
                 $this->showUpstream($upstreamId);
             }
@@ -89,5 +92,23 @@ class UpstreamsCommand extends AbstractCommand
             'nodes' => $upstream['value']['nodes'],
         ]);
         $this->output->writeln("<info>Remove node $node from upstream $upstreamId successfully!</info>");
+    }
+
+    private function addNode(string $upstreamId, string $node)
+    {
+        $weight = 100;
+        if (false !== strpos($node, '=')) {
+            [$node, $weight] = explode('=', $node, 2);
+        }
+        $upstream = $this->getAdminClient()->get('upstreams/'.$upstreamId);
+        if (isset($upstream['value']['nodes'][$node])) {
+            $this->output->writeln("<error>Upstream $upstreamId already has node $node, node list "
+                .implode(',', array_keys($upstream['value']['nodes'])).'</error>');
+        }
+        $upstream['value']['nodes'][$node] = $weight;
+        $this->getAdminClient()->patchJson('upstreams/'.$upstreamId, [
+            'nodes' => $upstream['value']['nodes'],
+        ]);
+        $this->output->writeln("<info>Add node $node to upstream $upstreamId successfully!</info>");
     }
 }
